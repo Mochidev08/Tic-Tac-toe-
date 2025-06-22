@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tic Tac Toe - Multiplayer Game</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 500px;
+            width: 100%;
+            text-align: center;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .screen {
+            display: none;
+        }
+
+        .screen.active {
+            display: block;
+        }
+
+        .input-group {
+            margin: 20px 0;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 10px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(45deg, #f093fb, #f5576c);
+        }
+
+        .btn-success {
+            background: linear-gradient(45deg, #4facfe, #00f2fe);
+        }
+
+        .game-board {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin: 30px 0;
+            max-width: 300px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .cell {
+            width: 80px;
+            height: 80px;
+            background: #f8f9fa;
+            border: 3px solid #dee2e6;
+            border-radius: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 2em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .cell:hover {
+            background: #e9ecef;
+            transform: scale(1.05);
+        }
+
+        .cell.x {
+            color: #e74c3c;
+        }
+
+        .cell.o {
+            color: #3498db;
+        }
+
+        .cell.winner {
+            background: #2ecc71;
+            color: white;
+        }
+
+        .game-info {
+            margin: 20px 0;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .current-player {
+            color: #667eea;
+        }
+
+        .status {
+            margin: 15px 0;
+            padding: 10px;
+            border-radius: 8px;
+            font-weight: bold;
+        }
+
+        .status.waiting {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status.playing {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status.ended {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .share-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+
+        .game-code {
+            font-family: monospace;
+            font-size: 18px;
+            font-weight: bold;
+            color: #667eea;
+            background: white;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+
+        .difficulty-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        .btn-difficulty {
+            flex: 1;
+            max-width: 120px;
+        }
+
+        .back-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(255, 255, 255, 0.8);
+            color: #333;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 20px;
+            }
+            
+            .cell {
+                width: 60px;
+                height: 60px;
+                font-size: 1.5em;
+            }
+            
+            h1 {
+                font-size: 2em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎮 Tic Tac Toe</h1>
+        
+        <!-- Username Screen -->
+        <div id="usernameScreen" class="screen active">
+            <div class="input-group">
+                <input type="text" id="usernameInput" placeholder="Masukkan username Anda" maxlength="15">
+            </div>
+            <button class="btn" onclick="setUsername()">Mulai Game</button>
+        </div>
+
+        <!-- Main Menu Screen -->
+        <div id="menuScreen" class="screen">
+            <div class="game-info">
+                <p>Selamat datang, <span id="playerName"></span>!</p>
+            </div>
+            
+            <button class="btn" onclick="showScreen('localGameScreen')">Main Lokal (2 Pemain)</button>
+            <button class="btn btn-secondary" onclick="showScreen('aiGameScreen')">Main vs Komputer</button>
+            <button class="btn btn-success" onclick="showScreen('onlineMenuScreen')">Main Online</button>
+        </div>
+
+        <!-- AI Game Setup Screen -->
+        <div id="aiGameScreen" class="screen">
+            <button class="back-btn" onclick="showScreen('menuScreen')">← Kembali</button>
+            
+            <h2>Main vs Komputer</h2>
+            <p>Pilih tingkat kesulitan:</p>
+            
+            <div class="difficulty-buttons">
+                <button class="btn btn-difficulty" onclick="startAIGame('easy')">Mudah</button>
+                <button class="btn btn-difficulty btn-secondary" onclick="startAIGame('hard')">Sulit</button>
+            </div>
+        </div>
+
+        <!-- Online Menu Screen -->
+        <div id="onlineMenuScreen" class="screen">
+            <button class="back-btn" onclick="showScreen('menuScreen')">← Kembali</button>
+            
+            <h2>Main Online</h2>
+            
+            <button class="btn" onclick="createOnlineGame()">Buat Room Baru</button>
+            
+            <div class="input-group">
+                <input type="text" id="joinCodeInput" placeholder="Masukkan kode room" maxlength="6">
+            </div>
+            <button class="btn btn-secondary" onclick="joinOnlineGame()">Gabung Room</button>
+        </div>
+
+        <!-- Online Game Created Screen -->
+        <div id="onlineCreatedScreen" class="screen">
+            <button class="back-btn" onclick="showScreen('onlineMenuScreen')">← Kembali</button>
+            
+            <h2>Room Berhasil Dibuat!</h2>
+            
+            <div class="share-section">
+                <p>Bagikan kode ini ke teman:</p>
+                <div class="game-code" id="gameCodeDisplay"></div>
+                <button class="btn btn-success" onclick="copyGameCode()">📋 Salin Kode</button>
+            </div>
+            
+            <div class="status waiting">
+                <p>⏳ Menunggu pemain lain bergabung...</p>
+            </div>
+        </div>
+
+        <!-- Local Game Screen -->
+        <div id="localGameScreen" class="screen">
+            <button class="back-btn" onclick="showScreen('menuScreen')">← Kembali</button>
+            
+            <div class="game-info">
+                <p>Giliran: <span class="current-player" id="currentPlayer">Pemain 1 (X)</span></p>
+            </div>
+            
+            <div class="game-board" id="gameBoard"></div>
+            
+            <div id="gameStatus" class="status playing">Game dimulai!</div>
+            
+            <button class="btn btn-secondary" onclick="resetGame()">🔄 Main Lagi</button>
+        </div>
+
+        <!-- Online Game Screen -->
+        <div id="onlineGameScreen" class="screen">
+            <button class="back-btn" onclick="showScreen('onlineMenuScreen')">← Kembali</button>
+            
+            <div class="game-info">
+                <p><span id="player1Name"></span> (X) vs <span id="player2Name"></span> (O)</p>
+                <p>Giliran: <span class="current-player" id="onlineCurrentPlayer"></span></p>
+            </div>
+            
+            <div class="game-board" id="onlineGameBoard"></div>
+            
+            <div id="onlineGameStatus" class="status playing">Game dimulai!</div>
+            
+            <button class="btn btn-secondary" onclick="resetOnlineGame()">🔄 Main Lagi</button>
+        </div>
+    </div>
+
+    <script>
+        // Game State
+        let currentPlayer = 'X';
+        let gameBoard = ['', '', '', '', '', '', '', '', ''];
+        let gameActive = true;
+        let gameMode = 'local'; // 'local', 'ai', 'online'
+        let aiDifficulty = 'easy';
+        let playerName = '';
+        let gameCode = '';
+        let onlineGameData = null;
+        let isMyTurn = true;
+
+        // Online game storage (in real app, this would be a server)
+        let onlineGames = {};
+
+        const winningConditions = [
+            [0, 1, 2], [3, 4, 5], [6, 7, 8], // Rows
+            [0, 3, 6], [1, 4, 7], [2, 5, 8], // Columns
+            [0, 4, 8], [2, 4, 6] // Diagonals
+        ];
+
+        // Username handling
+        function setUsername() {
+            const username = document.getElementById('usernameInput').value.trim();
+            if (username.length < 2) {
+                alert('Username minimal 2 karakter!');
+                return;
+            }
+            
+            playerName = username;
+            document.getElementById('playerName').textContent = playerName;
+            showScreen('menuScreen');
+        }
+
+        // Screen management
+        function showScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(screen => {
+                screen.classList.remove('active');
+            });
+            document.getElementById(screenId).classList.add('active');
+        }
+
+        // Local game functions
+        function startLocalGame() {
+            gameMode = 'local';
+            resetGameState();
+            createBoard('gameBoard');
+            updateGameInfo();
+        }
+
+        // AI game functions
+        function startAIGame(difficulty) {
+            gameMode = 'ai';
+            aiDifficulty = difficulty;
+            resetGameState();
+            createBoard('gameBoard');
+            updateGameInfo();
+            showScreen('localGameScreen');
+        }
+
+        // Online game functions
+        function createOnlineGame() {
+            gameCode = generateGameCode();
+            onlineGames[gameCode] = {
+                player1: { name: playerName, symbol: 'X' },
+                player2: null,
+                board: ['', '', '', '', '', '', '', '', ''],
+                currentPlayer: 'X',
+                active: false,
+                winner: null
+            };
+            
+            document.getElementById('gameCodeDisplay').textContent = gameCode;
+            showScreen('onlineCreatedScreen');
+            
+            // Start checking for player 2
+            checkForPlayer2();
+        }
+
+        function joinOnlineGame() {
+            const code = document.getElementById('joinCodeInput').value.trim().toUpperCase();
+            if (code.length !== 6) {
+                alert('Kode room harus 6 karakter!');
+                return;
+            }
+            
+            if (!onlineGames[code]) {
+                alert('Room tidak ditemukan!');
+                return;
+            }
+            
+            if (onlineGames[code].player2) {
+                alert('Room sudah penuh!');
+                return;
+            }
+            
+            // Join the game
+            onlineGames[code].player2 = { name: playerName, symbol: 'O' };
+            onlineGames[code].active = true;
+            
+            gameCode = code;
+            onlineGameData = onlineGames[code];
+            isMyTurn = false; // Player 2 starts second
+            
+            startOnlineGame();
+        }
+
+        function startOnlineGame() {
+            gameMode = 'online';
+            onlineGameData = onlineGames[gameCode];
+            
+            document.getElementById('player1Name').textContent = onlineGameData.player1.name;
+            document.getElementById('player2Name').textContent = onlineGameData.player2.name;
+            
+            resetOnlineGameState();
+            createBoard('onlineGameBoard');
+            updateOnlineGameInfo();
+            showScreen('onlineGameScreen');
+        }
+
+        function checkForPlayer2() {
+            const checkInterval = setInterval(() => {
+                if (onlineGames[gameCode] && onlineGames[gameCode].player2) {
+                    clearInterval(checkInterval);
+                    onlineGameData = onlineGames[gameCode];
+                    isMyTurn = true; // Player 1 starts first
+                    startOnlineGame();
+                }
+            }, 1000);
+        }
+
+        // Board creation
+        function createBoard(boardId) {
+            const board = document.getElementById(boardId);
+            board.innerHTML = '';
+            
+            for (let i = 0; i < 9; i++) {
+                const cell = document.createElement('div');
+                cell.classList.add('cell');
+                cell.setAttribute('data-index', i);
+                cell.addEventListener('click', () => handleCellClick(i, boardId));
+                board.appendChild(cell);
+            }
+        }
+
+        // Game logic
+        function handleCellClick(index, boardId) {
+            if (gameMode === 'online') {
+                handleOnlineCellClick(index);
+                return;
+            }
+            
+            if (gameBoard[index] !== '' || !gameActive) return;
+            
+            gameBoard[index] = currentPlayer;
+            updateBoard(boardId);
+            
+            if (checkWinner()) {
+                endGame(`${getCurrentPlayerName()} menang! 🎉`);
+                return;
+            }
+            
+            if (gameBoard.every(cell => cell !== '')) {
+                endGame('Seri! 🤝');
+                return;
+            }
+            
+            currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+            updateGameInfo();
+            
+            // AI turn
+            if (gameMode === 'ai' && currentPlayer === 'O' && gameActive) {
+                setTimeout(() => {
+                    makeAIMove();
+                }, 500);
+            }
+        }
+
+        function handleOnlineCellClick(index) {
+            if (!isMyTurn || !gameActive || onlineGameData.board[index] !== '') return;
+            
+            const mySymbol = playerName === onlineGameData.player1.name ? 'X' : 'O';
+            onlineGameData.board[index] = mySymbol;
+            onlineGameData.currentPlayer = mySymbol === 'X' ? 'O' : 'X';
+            
+            updateBoard('onlineGameBoard');
+            
+            if (checkOnlineWinner()) {
+                endOnlineGame(`${playerName} menang! 🎉`);
+                return;
+            }
+            
+            if (onlineGameData.board.every(cell => cell !== '')) {
+                endOnlineGame('Seri! 🤝');
+                return;
+            }
+            
+            isMyTurn = false;
+            updateOnlineGameInfo();
+        }
+
+        function makeAIMove() {
+            let move;
+            
+            if (aiDifficulty === 'easy') {
+                move = getRandomMove();
+            } else {
+                move = getBestMove();
+            }
+            
+            if (move !== -1) {
+                gameBoard[move] = 'O';
+                updateBoard('gameBoard');
+                
+                if (checkWinner()) {
+                    endGame('Komputer menang! 🤖');
+                    return;
+                }
+                
+                if (gameBoard.every(cell => cell !== '')) {
+                    endGame('Seri! 🤝');
+                    return;
+                }
+                
+                currentPlayer = 'X';
+                updateGameInfo();
+            }
+        }
+
+        function getRandomMove() {
+            const availableMoves = gameBoard
+                .map((cell, index) => cell === '' ? index : null)
+                .filter(val => val !== null);
+            
+            return availableMoves.length > 0 
+                ? availableMoves[Math.floor(Math.random() * availableMoves.length)]
+                : -1;
+        }
+
+        function getBestMove() {
+            let bestScore = -Infinity;
+            let move = -1;
+            
+            for (let i = 0; i < 9; i++) {
+                if (gameBoard[i] === '') {
+                    gameBoard[i] = 'O';
+                    let score = minimax(gameBoard, 0, false);
+                    gameBoard[i] = '';
+                    
+                    if (score > bestScore) {
+                        bestScore = score;
+                        move = i;
+                    }
+                }
+            }
+            
+            return move;
+        }
+
+        function minimax(board, depth, isMaximizing) {
+            let result = checkWinnerForMinimax(board);
+            
+            if (result !== null) {
+                return result === 'O' ? 1 : result === 'X' ? -1 : 0;
+            }
+            
+            if (isMaximizing) {
+                let bestScore = -Infinity;
+                for (let i = 0; i < 9; i++) {
+                    if (board[i] === '') {
+                        board[i] = 'O';
+                        let score = minimax(board, depth + 1, false);
+                        board[i] = '';
+                        bestScore = Math.max(score, bestScore);
+                    }
+                }
+                return bestScore;
+            } else {
+                let bestScore = Infinity;
+                for (let i = 0; i < 9; i++) {
+                    if (board[i] === '') {
+                        board[i] = 'X';
+                        let score = minimax(board, depth + 1, true);
+                        board[i] = '';
+                        bestScore = Math.min(score, bestScore);
+                    }
+                }
+                return bestScore;
+            }
+        }
+
+        function checkWinnerForMinimax(board) {
+            for (let condition of winningConditions) {
+                const [a, b, c] = condition;
+                if (board[a] && board[a] === board[b] && board[a] === board[c]) {
+                    return board[a];
+                }
+            }
+            return board.every(cell => cell !== '') ? 'tie' : null;
+        }
+
+        function checkWinner() {
+            for (let condition of winningConditions) {
+                const [a, b, c] = condition;
+                if (gameBoard[a] && gameBoard[a] === gameBoard[b] && gameBoard[a] === gameBoard[c]) {
+                    highlightWinningCells([a, b, c], 'gameBoard');
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        function checkOnlineWinner() {
+            for (let condition of winningConditions) {
+                const [a, b, c] = condition;
+                if (onlineGameData.board[a] && 
+                    onlineGameData.board[a] === onlineGameData.board[b] && 
+                    onlineGameData.board[a] === onlineGameData.board[c]) {
+                    highlightWinningCells([a, b, c], 'onlineGameBoard');
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        function highlightWinningCells(cells, boardId) {
+            cells.forEach(index => {
+                const cell = document.querySelector(`#${boardId} .cell[data-index="${index}"]`);
+                if (cell) cell.classList.add('winner');
+            });
+        }
+
+        function updateBoard(boardId) {
+            const board = gameMode === 'online' ? onlineGameData.board : gameBoard;
+            
+            document.querySelectorAll(`#${boardId} .cell`).forEach((cell, index) => {
+                cell.textContent = board[index];
+                cell.className = 'cell';
+                if (board[index] === 'X') cell.classList.add('x');
+                if (board[index] === 'O') cell.classList.add('o');
+            });
+        }
+
+        function updateGameInfo() {
+            const playerText = getCurrentPlayerName();
+            document.getElementById('currentPlayer').textContent = playerText;
+        }
+
+        function updateOnlineGameInfo() {
+            const currentPlayerName = onlineGameData.currentPlayer === 'X' 
+                ? onlineGameData.player1.name 
+                : onlineGameData.player2.name;
+            
+            document.getElementById('onlineCurrentPlayer').textContent = currentPlayerName;
+            
+            const status = document.getElementById('onlineGameStatus');
+            if (isMyTurn) {
+                status.textContent = '🎯 Giliran Anda!';
+                status.className = 'status playing';
+            } else {
+                status.textContent = '⏳ Menunggu lawan...';
+                status.className = 'status waiting';
+            }
+        }
+
+        function getCurrentPlayerName() {
+            if (gameMode === 'ai') {
+                return currentPlayer === 'X' ? playerName : 'Komputer';
+            }
+            return currentPlayer === 'X' ? 'Pemain 1 (X)' : 'Pemain 2 (O)';
+        }
+
+        function endGame(message) {
+            gameActive = false;
+            document.getElementById('gameStatus').textContent = message;
+            document.getElementById('gameStatus').className = 'status ended';
+        }
+
+        function endOnlineGame(message) {
+            gameActive = false;
+            onlineGameData.active = false;
+            document.getElementById('onlineGameStatus').textContent = message;
+            document.getElementById('onlineGameStatus').className = 'status ended';
+        }
+
+        function resetGame() {
+            if (gameMode === 'local') {
+                startLocalGame();
+            } else if (gameMode === 'ai') {
+                startAIGame(aiDifficulty);
+            }
+        }
+
+        function resetOnlineGame() {
+            if (onlineGameData) {
+                onlineGameData.board = ['', '', '', '', '', '', '', '', ''];
+                onlineGameData.currentPlayer = 'X';
+                onlineGameData.active = true;
+                onlineGameData.winner = null;
+                
+                isMyTurn = playerName === onlineGameData.player1.name;
+                gameActive = true;
+                
+                updateBoard('onlineGameBoard');
+                updateOnlineGameInfo();
+            }
+        }
+
+        function resetGameState() {
+            currentPlayer = 'X';
+            gameBoard = ['', '', '', '', '', '', '', '', ''];
+            gameActive = true;
+        }
+
+        function resetOnlineGameState() {
+            gameActive = true;
+        }
+
+        // Utility functions
+        function generateGameCode() {
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+            let result = '';
+            for (let i = 0; i < 6; i++) {
+                result += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            return result;
+        }
+
+        function copyGameCode() {
+            const gameCode = document.getElementById('gameCodeDisplay').textContent;
+            navigator.clipboard.writeText(gameCode).then(() => {
+                alert('Kode berhasil disalin!');
+            }).catch(() => {
+                // Fallback for browsers that don't support clipboard API
+                const textArea = document.createElement('textarea');
+                textArea.value = gameCode;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                alert('Kode berhasil disalin!');
+            });
+        }
+
+        // Auto-start local game when entering local game screen
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set up event listener for local game screen
+            const observer = new MutationObserver(function(mutations) {
+                mutations.forEach(function(mutation) {
+                    if (mutation.target.id === 'localGameScreen' && 
+                        mutation.target.classList.contains('active')) {
+                        if (gameMode === 'local' || gameMode === 'ai') {
+                            // Only create board if it doesn't exist
+                            if (!document.querySelector('#gameBoard .cell')) {
+                                if (gameMode === 'local') {
+                                    startLocalGame();
+                                } else {
+                                    resetGameState();
+                                    createBoard('gameBoard');
+                                    updateGameInfo();
+                                }
+                            }
+                        }
+                    }
+                });
+            });
+            
+            const screens = document.querySelectorAll('.screen');
+            screens.forEach(screen => {
+                observer.observe(screen, { attributes: true, attributeFilter: ['class'] });
+            });
+        });
+
+        // Online game polling (simulate real-time updates)
+        setInterval(() => {
+            if (gameMode === 'online' && onlineGameData && !isMyTurn) {
+                // Check if it's now my turn
+                const mySymbol = playerName === onlineGameData.player1.name ? 'X' : 'O';
+                if (onlineGameData.currentPlayer === mySymbol && gameActive) {
+                    isMyTurn = true;
+                    updateOnlineGameInfo();
+                }
+            }
+        }, 1000);
+    </script>
+</body>
+</html>
