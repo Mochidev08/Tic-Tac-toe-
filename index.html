@@ -789,28 +789,753 @@
                                     updateGameInfo();
                                 }
                             }
-                        }
-                    }
-                });
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tic Tac Toe Game</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+
+        .container {
+            text-align: center;
+            width: 100%;
+            max-width: 500px;
+            padding: 20px;
+        }
+
+        .screen {
+            display: none;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .screen.active {
+            display: block;
+        }
+
+        h1 {
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            background: rgba(255, 255, 255, 0.9);
+            color: #333;
+        }
+
+        .btn {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 10px;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 5px;
+            transition: all 0.3s ease;
+            min-width: 120px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn.secondary {
+            background: linear-gradient(45deg, #3742fa, #2f3542);
+        }
+
+        .btn.back {
+            background: linear-gradient(45deg, #ffa502, #ff6348);
+            padding: 8px 20px;
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+
+        .game-board {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: repeat(3, 1fr);
+            gap: 3px;
+            width: 300px;
+            height: 300px;
+            margin: 20px auto;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .cell {
+            width: 94px;
+            height: 94px;
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+            font-size: 28px;
+            font-weight: bold;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .cell:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.05);
+        }
+
+        .cell.x {
+            color: #ff6b6b;
+        }
+
+        .cell.o {
+            color: #4ecdc4;
+        }
+
+        .game-info {
+            margin: 20px 0;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .room-info {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+
+        .room-code {
+            font-size: 20px;
+            font-weight: bold;
+            color: #ffd700;
+            margin: 10px 0;
+            word-break: break-all;
+        }
+
+        .waiting {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .result {
+            font-size: 24px;
+            font-weight: bold;
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .win {
+            background: rgba(76, 175, 80, 0.3);
+            color: #4caf50;
+        }
+
+        .lose {
+            background: rgba(244, 67, 54, 0.3);
+            color: #f44336;
+        }
+
+        .draw {
+            background: rgba(255, 193, 7, 0.3);
+            color: #ffc107;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .screen {
+                padding: 20px;
+                margin: 10px;
+            }
+            
+            h1 {
+                font-size: 2em;
+            }
+            
+            .game-board {
+                width: 250px;
+                height: 250px;
+                gap: 2px;
+                padding: 8px;
+            }
+            
+            .cell {
+                width: 76px;
+                height: 76px;
+                font-size: 24px;
+            }
+        }
+
+        @media (max-width: 400px) {
+            .game-board {
+                width: 220px;
+                height: 220px;
+                gap: 2px;
+                padding: 6px;
+            }
+            
+            .cell {
+                width: 66px;
+                height: 66px;
+                font-size: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Username Screen -->
+        <div id="username-screen" class="screen active">
+            <h1>🎮 Tic Tac Toe</h1>
+            <div class="input-group">
+                <label for="username">Masukkan Username:</label>
+                <input type="text" id="username" placeholder="Username Anda">
+            </div>
+            <button class="btn" onclick="setUsername()">Mulai Bermain</button>
+        </div>
+
+        <!-- Menu Screen -->
+        <div id="menu-screen" class="screen">
+            <h1>🎮 Tic Tac Toe</h1>
+            <p>Selamat datang, <span id="player-name"></span>!</p>
+            <div style="margin-top: 30px;">
+                <button class="btn" onclick="startSinglePlayer()">🤖 Main vs Komputer</button>
+                <button class="btn" onclick="showCreateRoom()">👥 Buat Room Multiplayer</button>
+                <button class="btn secondary" onclick="showJoinRoom()">🔗 Gabung Room</button>
+            </div>
+        </div>
+
+        <!-- Single Player Mode Selection -->
+        <div id="mode-screen" class="screen">
+            <button class="btn back" onclick="showMenu()">← Kembali</button>
+            <h1>🤖 Mode Komputer</h1>
+            <p>Pilih tingkat kesulitan:</p>
+            <div style="margin-top: 20px;">
+                <button class="btn" onclick="startGame('easy')">😊 Mudah</button>
+                <button class="btn" onclick="startGame('hard')">🔥 Sulit</button>
+            </div>
+        </div>
+
+        <!-- Create Room Screen -->
+        <div id="create-room-screen" class="screen">
+            <button class="btn back" onclick="showMenu()">← Kembali</button>
+            <h1>👥 Buat Room Multiplayer</h1>
+            <div class="room-info">
+                <p>Room Code Anda:</p>
+                <div class="room-code" id="room-code"></div>
+                <p>Bagikan kode ini kepada teman Anda!</p>
+            </div>
+            <button class="btn" onclick="copyRoomCode()">📋 Salin Kode</button>
+            <div class="waiting" id="waiting-message">
+                <p>Menunggu pemain lain bergabung...</p>
+            </div>
+        </div>
+
+        <!-- Join Room Screen -->
+        <div id="join-room-screen" class="screen">
+            <button class="btn back" onclick="showMenu()">← Kembali</button>
+            <h1>🔗 Gabung Room</h1>
+            <div class="input-group">
+                <label for="room-code-input">Masukkan Room Code:</label>
+                <input type="text" id="room-code-input" placeholder="Kode Room">
+            </div>
+            <button class="btn" onclick="joinRoom()">Gabung</button>
+        </div>
+
+        <!-- Game Screen -->
+        <div id="game-screen" class="screen">
+            <button class="btn back" onclick="showMenu()">← Kembali</button>
+            <h1>🎮 Tic Tac Toe</h1>
+            <div class="game-info">
+                <div id="game-status">Giliran Anda (X)</div>
+                <div id="opponent-info"></div>
+            </div>
+            <div class="game-board" id="game-board">
+                <button class="cell" onclick="makeMove(0)"></button>
+                <button class="cell" onclick="makeMove(1)"></button>
+                <button class="cell" onclick="makeMove(2)"></button>
+                <button class="cell" onclick="makeMove(3)"></button>
+                <button class="cell" onclick="makeMove(4)"></button>
+                <button class="cell" onclick="makeMove(5)"></button>
+                <button class="cell" onclick="makeMove(6)"></button>
+                <button class="cell" onclick="makeMove(7)"></button>
+                <button class="cell" onclick="makeMove(8)"></button>
+            </div>
+            <div id="game-result" class="result" style="display: none;"></div>
+            <button class="btn" onclick="resetGame()" style="display: none;" id="reset-btn">🔄 Main Lagi</button>
+        </div>
+    </div>
+
+    <script>
+        // Game state
+        let gameState = {
+            currentPlayer: 'X',
+            board: ['', '', '', '', '', '', '', '', ''],
+            gameMode: null, // 'easy', 'hard', 'multiplayer'
+            isGameActive: true,
+            playerUsername: '',
+            currentRoom: null,
+            isHost: false,
+            playerSymbol: 'X',
+            opponentSymbol: 'O'
+        };
+
+        // Mock multiplayer data storage
+        let rooms = {};
+
+        // Utility functions
+        function showScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(screen => {
+                screen.classList.remove('active');
+            });
+            const targetScreen = document.getElementById(screenId);
+            if (targetScreen) {
+                targetScreen.classList.add('active');
+            }
+        }
+
+        function setUsername() {
+            const usernameInput = document.getElementById('username');
+            const username = usernameInput.value.trim();
+            
+            if (username) {
+                gameState.playerUsername = username;
+                document.getElementById('player-name').textContent = username;
+                showScreen('menu-screen');
+            } else {
+                alert('Silakan masukkan username!');
+            }
+        }
+
+        function showMenu() {
+            showScreen('menu-screen');
+            resetGameState();
+        }
+
+        function startSinglePlayer() {
+            showScreen('mode-screen');
+        }
+
+        function showCreateRoom() {
+            const roomCode = generateRoomCode();
+            gameState.currentRoom = roomCode;
+            gameState.isHost = true;
+            
+            // Create room
+            rooms[roomCode] = {
+                host: gameState.playerUsername,
+                guest: null,
+                board: ['', '', '', '', '', '', '', '', ''],
+                currentPlayer: 'X',
+                isGameActive: true
+            };
+            
+            document.getElementById('room-code').textContent = roomCode;
+            showScreen('create-room-screen');
+            
+            // Simulate waiting for player
+            setTimeout(() => {
+                checkForGuest(roomCode);
+            }, 1000);
+        }
+
+        function showJoinRoom() {
+            showScreen('join-room-screen');
+        }
+
+        function generateRoomCode() {
+            return Math.random().toString(36).substr(2, 6).toUpperCase();
+        }
+
+        function copyRoomCode() {
+            const roomCode = document.getElementById('room-code').textContent;
+            navigator.clipboard.writeText(roomCode).then(() => {
+                alert('Kode room berhasil disalin!');
+            }).catch(() => {
+                // Fallback for older browsers
+                const textArea = document.createElement('textarea');
+                textArea.value = roomCode;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                alert('Kode room berhasil disalin!');
+            });
+        }
+
+        function checkForGuest(roomCode) {
+            const room = rooms[roomCode];
+            if (room && room.guest) {
+                // Guest joined, start game
+                gameState.gameMode = 'multiplayer';
+                gameState.playerSymbol = 'X';
+                gameState.opponentSymbol = 'O';
+                document.getElementById('opponent-info').textContent = `vs ${room.guest}`;
+                startMultiplayerGame();
+            } else if (room) {
+                // Keep checking
+                setTimeout(() => checkForGuest(roomCode), 1000);
+            }
+        }
+
+        function joinRoom() {
+            const roomCodeInput = document.getElementById('room-code-input');
+            const roomCode = roomCodeInput.value.trim().toUpperCase();
+            
+            if (!roomCode) {
+                alert('Silakan masukkan kode room!');
+                return;
+            }
+            
+            const room = rooms[roomCode];
+            if (!room) {
+                alert('Room tidak ditemukan! Periksa kembali kode room.');
+                return;
+            }
+            
+            if (room.guest) {
+                alert('Room sudah penuh!');
+                return;
+            }
+            
+            // Join room
+            room.guest = gameState.playerUsername;
+            gameState.currentRoom = roomCode;
+            gameState.isHost = false;
+            gameState.gameMode = 'multiplayer';
+            gameState.playerSymbol = 'O';
+            gameState.opponentSymbol = 'X';
+            
+            document.getElementById('opponent-info').textContent = `vs ${room.host}`;
+            startMultiplayerGame();
+        }
+
+        function startGame(mode) {
+            gameState.gameMode = mode;
+            gameState.isGameActive = true;
+            gameState.currentPlayer = 'X';
+            gameState.playerSymbol = 'X';
+            gameState.opponentSymbol = 'O';
+            
+            document.getElementById('opponent-info').textContent = mode === 'easy' ? 'vs Komputer (Mudah)' : 'vs Komputer (Sulit)';
+            showScreen('game-screen');
+            resetBoard();
+            updateGameStatus();
+        }
+
+        function startMultiplayerGame() {
+            gameState.isGameActive = true;
+            gameState.currentPlayer = 'X';
+            showScreen('game-screen');
+            resetBoard();
+            updateGameStatus();
+        }
+
+        function resetBoard() {
+            gameState.board = ['', '', '', '', '', '', '', '', ''];
+            const cells = document.querySelectorAll('.cell');
+            cells.forEach(cell => {
+                cell.textContent = '';
+                cell.classList.remove('x', 'o');
+                cell.disabled = false;
             });
             
-            const screens = document.querySelectorAll('.screen');
-            screens.forEach(screen => {
-                observer.observe(screen, { attributes: true, attributeFilter: ['class'] });
-            });
-        });
+            const gameResult = document.getElementById('game-result');
+            const resetBtn = document.getElementById('reset-btn');
+            if (gameResult) gameResult.style.display = 'none';
+            if (resetBtn) resetBtn.style.display = 'none';
+        }
 
-        // Online game polling (simulate real-time updates)
-        setInterval(() => {
-            if (gameMode === 'online' && onlineGameData && !isMyTurn) {
-                // Check if it's now my turn
-                const mySymbol = playerName === onlineGameData.player1.name ? 'X' : 'O';
-                if (onlineGameData.currentPlayer === mySymbol && gameActive) {
-                    isMyTurn = true;
-                    updateOnlineGameInfo();
+        function makeMove(index) {
+            if (!gameState.isGameActive || gameState.board[index] !== '') {
+                return;
+            }
+
+            // For multiplayer, check if it's player's turn
+            if (gameState.gameMode === 'multiplayer') {
+                if (gameState.currentPlayer !== gameState.playerSymbol) {
+                    return;
                 }
             }
-        }, 1000);
+
+            // Make the move
+            gameState.board[index] = gameState.currentPlayer;
+            const cell = document.querySelectorAll('.cell')[index];
+            if (cell) {
+                cell.textContent = gameState.currentPlayer;
+                cell.classList.add(gameState.currentPlayer.toLowerCase());
+                cell.disabled = true;
+            }
+
+            // Check for win/draw
+            if (checkWin()) {
+                endGame(gameState.currentPlayer);
+                return;
+            }
+
+            if (checkDraw()) {
+                endGame('draw');
+                return;
+            }
+
+            // Switch player
+            gameState.currentPlayer = gameState.currentPlayer === 'X' ? 'O' : 'X';
+            updateGameStatus();
+
+            // Update room state for multiplayer
+            if (gameState.gameMode === 'multiplayer' && gameState.currentRoom) {
+                const room = rooms[gameState.currentRoom];
+                if (room) {
+                    room.board = [...gameState.board];
+                    room.currentPlayer = gameState.currentPlayer;
+                }
+            }
+
+            // Computer move for single player
+            if (gameState.gameMode === 'easy' || gameState.gameMode === 'hard') {
+                if (gameState.currentPlayer === 'O') {
+                    setTimeout(() => {
+                        makeComputerMove();
+                    }, 500);
+                }
+            }
+
+            // Simulate opponent move for multiplayer
+            if (gameState.gameMode === 'multiplayer' && gameState.currentPlayer === gameState.opponentSymbol) {
+                setTimeout(() => {
+                    simulateOpponentMove();
+                }, 1000);
+            }
+        }
+
+        function makeComputerMove() {
+            if (!gameState.isGameActive) return;
+
+            let moveIndex;
+            
+            if (gameState.gameMode === 'easy') {
+                // Easy mode: random move
+                const availableMoves = gameState.board
+                    .map((cell, index) => cell === '' ? index : null)
+                    .filter(index => index !== null);
+                
+                if (availableMoves.length > 0) {
+                    moveIndex = availableMoves[Math.floor(Math.random() * availableMoves.length)];
+                }
+            } else {
+                // Hard mode: minimax algorithm
+                moveIndex = getBestMove();
+            }
+
+            if (moveIndex !== undefined) {
+                makeMove(moveIndex);
+            }
+        }
+
+        function simulateOpponentMove() {
+            if (!gameState.isGameActive) return;
+
+            const availableMoves = gameState.board
+                .map((cell, index) => cell === '' ? index : null)
+                .filter(index => index !== null);
+            
+            if (availableMoves.length > 0) {
+                const randomIndex = availableMoves[Math.floor(Math.random() * availableMoves.length)];
+                makeMove(randomIndex);
+            }
+        }
+
+        function getBestMove() {
+            let bestScore = -Infinity;
+            let bestMove;
+
+            for (let i = 0; i < 9; i++) {
+                if (gameState.board[i] === '') {
+                    gameState.board[i] = 'O';
+                    let score = minimax(gameState.board, 0, false);
+                    gameState.board[i] = '';
+                    
+                    if (score > bestScore) {
+                        bestScore = score;
+                        bestMove = i;
+                    }
+                }
+            }
+            
+            return bestMove;
+        }
+
+        function minimax(board, depth, isMaximizing) {
+            const result = checkWinner(board);
+            
+            if (result === 'O') return 10 - depth;
+            if (result === 'X') return depth - 10;
+            if (result === 'draw') return 0;
+
+            if (isMaximizing) {
+                let bestScore = -Infinity;
+                for (let i = 0; i < 9; i++) {
+                    if (board[i] === '') {
+                        board[i] = 'O';
+                        let score = minimax(board, depth + 1, false);
+                        board[i] = '';
+                        bestScore = Math.max(score, bestScore);
+                    }
+                }
+                return bestScore;
+            } else {
+                let bestScore = Infinity;
+                for (let i = 0; i < 9; i++) {
+                    if (board[i] === '') {
+                        board[i] = 'X';
+                        let score = minimax(board, depth + 1, true);
+                        board[i] = '';
+                        bestScore = Math.min(score, bestScore);
+                    }
+                }
+                return bestScore;
+            }
+        }
+
+        function checkWin() {
+            return checkWinner(gameState.board);
+        }
+
+        function checkWinner(board) {
+            const winPatterns = [
+                [0, 1, 2], [3, 4, 5], [6, 7, 8], // Rows
+                [0, 3, 6], [1, 4, 7], [2, 5, 8], // Columns
+                [0, 4, 8], [2, 4, 6]             // Diagonals
+            ];
+
+            for (let pattern of winPatterns) {
+                const [a, b, c] = pattern;
+                if (board[a] && board[a] === board[b] && board[a] === board[c]) {
+                    return board[a];
+                }
+            }
+
+            return null;
+        }
+
+        function checkDraw() {
+            return gameState.board.every(cell => cell !== '') && !checkWin();
+        }
+
+        function endGame(winner) {
+            gameState.isGameActive = false;
+            const gameResult = document.getElementById('game-result');
+            const resetBtn = document.getElementById('reset-btn');
+            
+            if (gameResult) {
+                gameResult.style.display = 'block';
+                
+                if (winner === 'draw') {
+                    gameResult.textContent = '🤝 Seri!';
+                    gameResult.className = 'result draw';
+                } else if (winner === gameState.playerSymbol) {
+                    gameResult.textContent = '🎉 Anda Menang!';
+                    gameResult.className = 'result win';
+                } else {
+                    gameResult.textContent = '😢 Anda Kalah!';
+                    gameResult.className = 'result lose';
+                }
+            }
+            
+            if (resetBtn) {
+                resetBtn.style.display = 'inline-block';
+            }
+        }
+
+        function updateGameStatus() {
+            const gameStatus = document.getElementById('game-status');
+            if (!gameStatus) return;
+
+            if (gameState.gameMode === 'multiplayer') {
+                if (gameState.currentPlayer === gameState.playerSymbol) {
+                    gameStatus.textContent = `Giliran Anda (${gameState.playerSymbol})`;
+                } else {
+                    gameStatus.textContent = `Giliran Lawan (${gameState.opponentSymbol})`;
+                }
+            } else {
+                if (gameState.currentPlayer === 'X') {
+                    gameStatus.textContent = 'Giliran Anda (X)';
+                } else {
+                    gameStatus.textContent = 'Giliran Komputer (O)';
+                }
+            }
+        }
+
+        function resetGame() {
+            gameState.isGameActive = true;
+            gameState.currentPlayer = 'X';
+            resetBoard();
+            updateGameStatus();
+        }
+
+        function resetGameState() {
+            gameState.currentPlayer = 'X';
+            gameState.board = ['', '', '', '', '', '', '', '', ''];
+            gameState.gameMode = null;
+            gameState.isGameActive = true;
+            gameState.currentRoom = null;
+            gameState.isHost = false;
+            gameState.playerSymbol = 'X';
+            gameState.opponentSymbol = 'O';
+        }
+
+        // Initialize game
+        window.onload = function() {
+            showScreen('username-screen');
+        };
     </script>
 </body>
 </html>
